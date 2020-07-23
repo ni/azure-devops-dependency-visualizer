@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<script src="lib/VSS.SDK.js"></script>
+	<script>
+		VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformScripts: true
+        });
+
+		var menuContributionHandler = (function () {
+			"use strict";
+			return {
+				execute: function (actionContext) {
+					VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient", "TFS/WorkItemTracking/Contracts"], function (VSS_Service, TFS_Wit_WebApi, TFS_Wit_Contracts) {
+						(async () => {
+							var widthPercentage = 75;
+							var heightPercentage =  70;
+							var dialogWidth = parseInt((window.screen.width / 100 * widthPercentage).toString());
+							var dialogHeight = parseInt((window.screen.height / 100 * heightPercentage).toString());
+							
+							var workItemType = actionContext.workItemTypeNames[0];
+							var workItemId = actionContext.workItemIds[0];
+							var workItem = {
+								type: workItemType,
+								id: workItemId,
+								project: actionContext.workItemProjects[workItemId],
+								team: actionContext.team.name
+							};
+							
+							var witClient = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkItemTrackingHttpClient);							
+							var parentWorkItem = await witClient.getWorkItem(workItemId, undefined, undefined, TFS_Wit_Contracts.WorkItemExpand.All);
+														
+							var dialogService = await VSS.getService(VSS.ServiceIds.Dialog);
+							
+							var parentWorkItemTitle = parentWorkItem.fields["System.Title"];
+							
+							if (!parentWorkItem.relations.some(function(relation) {
+								return relation.rel == "System.LinkTypes.Hierarchy-Forward";
+							})) {
+								var alertDialogOptions = {
+									buttons: [dialogService.buttons.ok],
+									title: "No child items to visualize"
+								}
+								var message = "To see dependencies between this " + workItemType.toLowerCase() + " and other work items, run the command from the parent work item."
+								dialogService.openMessageDialog(message, alertDialogOptions);
+								return;
+							}
+							
+							var dialogTitle = workItemType + ": " + parentWorkItemTitle;
+							var opts = {
+								width: dialogWidth,
+								height: dialogHeight,
+								title: dialogTitle,
+								buttons: null
+							};
+							
+							var configuration =
+							{
+								actionContext: actionContext,
+								witClient: witClient,
+								expandAll: TFS_Wit_Contracts.WorkItemExpand.All
+							};
+							
+							var extensionContext = VSS.getExtensionContext();
+							dialogService.openDialog(extensionContext.publisherId + "." + extensionContext.extensionId + ".graph-window", opts, configuration);
+						})();
+					});
+				}
+			};
+		}());
+
+        VSS.ready(function () {
+            VSS.register(VSS.getContribution().id, menuContributionHandler);
+			VSS.notifyLoadSucceeded();
+        });
+	</script>
+</head>
+<body>
+</body>
+</html>
