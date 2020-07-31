@@ -1,0 +1,5 @@
+## Ignore installed dependencies
+node_modules/
+
+## Ignore built extensions
+*.vsix

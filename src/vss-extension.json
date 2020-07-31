@@ -1,0 +1,89 @@
+{
+    "manifestVersion": 1,
+    "id": "azure-devops-dependency-visualizer",
+    "publisher": "JulianValdezNI",
+    "version": "1.0.0",
+    "name": "Dependency Visualizer",
+    "description": "A sample Visual Studio Services extension",
+    "public": false,
+    "categories": ["Azure Repos"],
+	"scopes": ["vso.work"],
+	"icons": {
+        "default": "images/defaultIcon.png"
+    },
+	"content": {
+        "details": {
+            "path": "content/overview.md"
+        }
+    },
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+	"contributions": [
+        {
+            "id": "visualize-work-item-action",
+            "type": "ms.vss-web.action",
+            "description": "A command that launches a graph display of the dependencies under a given work item.",
+            "targets": [
+                "ms.vss-work-web.backlog-item-menu"
+            ],
+            "properties": {
+                "text": "Visualize dependencies",
+                "title": "Visualize dependencies",
+                "icon": "images/icon.png",
+                "uri": "visualize-work-item-action.html"
+            }
+        },
+		{
+			"id": "graph-window",
+			"type": "ms.vss-web.control",
+			"description": "The content to be displayed in the dialog",
+			"targets": [],
+			"properties": {
+				"uri": "graph-window.html"
+			}
+		}
+    ],
+    "files": [
+        {
+            "path": "visualize-work-item-action.html",
+            "addressable": true
+        },
+        {
+            "path": "graph-window.html",
+            "addressable": true
+        },
+        {
+            "path": "renderer.js",
+            "addressable": true
+        },
+        {
+            "path": "work-item-provider.js",
+            "addressable": true
+        },
+        {
+            "path": "work-item-graph.js",
+            "addressable": true
+        },
+        {
+            "path": "images",
+            "addressable": true
+        },
+        {
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        },
+        {
+            "path": "node_modules/vis/dist",
+            "addressable": true,
+            "packagePath": "vis"
+        },
+        {
+            "path": "content",
+            "addressable": true
+        }
+    ]
+}

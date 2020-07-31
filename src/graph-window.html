@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="lib/VSS.SDK.js"></script>
+		<script src="work-item-provider.js"></script> 
+		<script src="renderer.js"></script>
+		<script src="work-item-graph.js"></script>
+		<script src="vis/vis.js"></script>	
+		<link href="vis/vis-network.min.css" rel="stylesheet" type="text/css"></link>
+		<style type="text/css">
+            #refreshButton {
+                position: absolute;
+                left: 20px;
+                top: 20px;
+                z-index: 1;
+				border: 2px solid rgba(43, 124, 233, 1);
+                background-color: rgba(229, 233, 234, 1);
+            }
+			#network {
+				height: 100vh;
+				width: 100vw;
+				border: 1px solid lightgray;
+				background-color: rgba(153, 182, 229, 0.4);
+			}
+		</style>
+	</head>
+	<body>
+		<div id="network"></div>
+		<script>
+			var parentWorkItemId;
+			var witClient;
+			var expandAll;
+			var hostUri;
+			
+			var buildGraph = function() {
+                (async () => {
+					var workItemProvider = new WorkItemProvider(parentWorkItemId, witClient, expandAll, hostUri);
+                    var workItems = await workItemProvider.getWorkItems();
+                    var graph = new WorkItemGraph(document.getElementById('network'), workItems);
+                })();
+			}
+	
+			VSS.init({
+				explicitNotifyLoaded: true,
+				usePlatformScripts: true,
+				usePlatformStyles: true,
+			});
+
+			VSS.ready(function () {
+				var config = VSS.getConfiguration();				
+				var webContext = VSS.getWebContext();
+				witClient = config.witClient;					
+				parentWorkItemId = config.actionContext.workItemIds[0];
+				expandAll = config.expandAll;
+				hostUri = webContext.host.uri;
+				
+				buildGraph();
+				
+				VSS.notifyLoadSucceeded();
+			});
+		</script>
+        <input id="refreshButton" onclick="buildGraph()" type="image" src="images/refresh.png" alt="Refresh" width="48" height="48">
+	</body>
+</html>
